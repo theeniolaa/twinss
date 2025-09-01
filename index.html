@@ -12,13 +12,14 @@
 
         startBtn.addEventListener("click", async () => {
           try {
-            // ✅ Play video after user tap to allow audio
-            await video.play();
+            // ✅ Prepare video playback for iOS audio
+            await video.play(); 
+            video.pause(); // pause immediately until target is found
           } catch (err) {
             console.warn("Video play blocked:", err);
           }
 
-          // Start AR after user gesture
+          // Start AR system after user gesture
           const scene = document.querySelector("a-scene");
           scene.addEventListener("loaded", () => {
             const target = document.querySelector("[mindar-image-target]");
