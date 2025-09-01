@@ -5,16 +5,28 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
     <script>
+      // Component to force A-Frame to update video texture each frame (iOS fix)
+      AFRAME.registerComponent('video-texture', {
+        tick: function () {
+          const el = this.el;
+          const video = el.getAttribute('src');
+          if (video && video.readyState >= 2) {
+            el.getObject3D('mesh').material.map.needsUpdate = true;
+          }
+        }
+      });
+
       document.addEventListener("DOMContentLoaded", () => {
         const video = document.getElementById("target-video");
         const startBtn = document.getElementById("startBtn");
 
         startBtn.addEventListener("click", async () => {
           try {
-            // ✅ Prepare video playback for iOS audio
-            await video.play(); 
-            video.pause(); // pause immediately until target is found
+            // Prepare video for playback to enable audio on iOS
+            await video.play();
+            video.pause(); // pause until target is found
           } catch (err) {
             console.warn("Video play blocked:", err);
           }
@@ -27,7 +39,7 @@
               video.play(); // play video when marker is detected
             });
             target.addEventListener("targetLost", () => {
-              video.pause();
+              video.pause(); // pause video when marker lost
             });
           });
 
@@ -35,6 +47,7 @@
         });
       });
     </script>
+
     <style>
       body,
       html {
@@ -99,6 +112,7 @@
           width="1.6"
           height="1.3"
           position="0 0 0"
+          video-texture
         ></a-video>
       </a-entity>
     </a-scene>
