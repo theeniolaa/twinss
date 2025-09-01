@@ -11,14 +11,16 @@
         const startBtn = document.getElementById("startBtn");
 
         startBtn.addEventListener("click", async () => {
-          // ✅ User gesture: required for Safari video playback
+          // ✅ Unmute video after user gesture (iOS requirement for audio)
+          video.muted = false;
+
           try {
             await video.play();
           } catch (err) {
             console.warn("Video play blocked:", err);
           }
 
-          // Start listening for marker events AFTER video allowed
+          // Attach target detection events
           const scene = document.querySelector("a-scene");
           scene.addEventListener("loaded", () => {
             const target = document.querySelector("[mindar-image-target]");
@@ -65,7 +67,7 @@
     </style>
   </head>
   <body>
-    <!-- ✅ Start AR button for iOS -->
+    <!-- ✅ Start button -->
     <button id="startBtn">Start AR</button>
 
     <a-scene
