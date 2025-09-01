@@ -8,16 +8,29 @@
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const video = document.getElementById("target-video");
+        const startBtn = document.getElementById("startBtn");
 
-        const scene = document.querySelector("a-scene");
-        scene.addEventListener("loaded", () => {
-          const target = document.querySelector("[mindar-image-target]");
-          target.addEventListener("targetFound", () => {
-            video.play();
+        startBtn.addEventListener("click", async () => {
+          // ✅ User gesture: required for Safari video playback
+          try {
+            await video.play();
+          } catch (err) {
+            console.warn("Video play blocked:", err);
+          }
+
+          // Start listening for marker events AFTER video allowed
+          const scene = document.querySelector("a-scene");
+          scene.addEventListener("loaded", () => {
+            const target = document.querySelector("[mindar-image-target]");
+            target.addEventListener("targetFound", () => {
+              video.play();
+            });
+            target.addEventListener("targetLost", () => {
+              video.pause();
+            });
           });
-          target.addEventListener("targetLost", () => {
-            video.pause();
-          });
+
+          startBtn.style.display = "none";
         });
       });
     </script>
@@ -39,11 +52,24 @@
         height: 100%;
         overflow: hidden;
       }
+
+      #startBtn {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        padding: 12px 24px;
+        z-index: 10;
+      }
     </style>
   </head>
   <body>
+    <!-- ✅ Start AR button for iOS -->
+    <button id="startBtn">Start AR</button>
+
     <a-scene
-      mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/theeniolaa/twinss@main/assets/targetstwins.mind"
+      mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/theeniolaa/twinss@main/assets/targetstwins.mind; autoStart: true"
       embedded
       color-space="sRGB"
       renderer="colorManagement: true, physicallyCorrectLights"
@@ -55,7 +81,8 @@
           id="target-video"
           src="https://cdn.jsdelivr.net/gh/theeniolaa/twinss@main/assets/twinsvideo.mp4"
           crossorigin="anonymous"
-          loop="true"
+          loop
+          muted
           playsinline
           webkit-playsinline
         ></video>
