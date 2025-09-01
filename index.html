@@ -5,36 +5,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-
     <script>
-      // Component to force A-Frame to update video texture each frame (iOS fix)
-      AFRAME.registerComponent('video-texture', {
-        tick: function () {
-          const el = this.el;
-          const video = el.getAttribute('src');
-          if (video && video.readyState >= 2) {
-            el.getObject3D('mesh').material.map.needsUpdate = true;
-          }
-        }
-      });
-
       document.addEventListener("DOMContentLoaded", () => {
         const video = document.getElementById("target-video");
         const startBtn = document.getElementById("startBtn");
 
         startBtn.addEventListener("click", async () => {
-          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-          if (isIOS) {
-            // iOS requires a user gesture to play video with audio
-            try {
-              await video.play();
-              video.pause(); // pause until target is detected
-            } catch (err) {
-              console.warn("iOS video play blocked:", err);
-            }
+          try {
+            // ✅ Prepare video playback for iOS audio
+            await video.play(); 
+            video.pause(); // pause immediately until target is found
+          } catch (err) {
+            console.warn("Video play blocked:", err);
           }
 
+          // Start AR system after user gesture
           const scene = document.querySelector("a-scene");
           scene.addEventListener("loaded", () => {
             const target = document.querySelector("[mindar-image-target]");
@@ -42,15 +27,14 @@
               video.play(); // play video when marker is detected
             });
             target.addEventListener("targetLost", () => {
-              video.pause(); // pause video when marker lost
+              video.pause();
             });
           });
 
-          startBtn.style.display = "none"; // hide button
+          startBtn.style.display = "none"; // hide button after tap
         });
       });
     </script>
-
     <style>
       body,
       html {
@@ -94,4 +78,29 @@
       device-orientation-permission-ui="enabled: false"
     >
       <a-assets>
-        <
+        <video
+          id="target-video"
+          src="https://cdn.jsdelivr.net/gh/theeniolaa/twinss@main/assets/twinsvideo.mp4"
+          crossorigin="anonymous"
+          loop
+          playsinline
+          webkit-playsinline
+        ></video>
+      </a-assets>
+
+      <a-camera
+        position="0 0 0"
+        look-controls="enabled: false"
+      ></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-video
+          src="#target-video"
+          width="1.6"
+          height="1.3"
+          position="0 0 0"
+        ></a-video>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
