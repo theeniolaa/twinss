@@ -11,28 +11,26 @@
         const startBtn = document.getElementById("startBtn");
 
         startBtn.addEventListener("click", async () => {
-          // ✅ Unmute video after user gesture (iOS requirement for audio)
-          video.muted = false;
-
           try {
+            // ✅ Play video after user tap to allow audio
             await video.play();
           } catch (err) {
             console.warn("Video play blocked:", err);
           }
 
-          // Attach target detection events
+          // Start AR after user gesture
           const scene = document.querySelector("a-scene");
           scene.addEventListener("loaded", () => {
             const target = document.querySelector("[mindar-image-target]");
             target.addEventListener("targetFound", () => {
-              video.play();
+              video.play(); // play video when marker is detected
             });
             target.addEventListener("targetLost", () => {
               video.pause();
             });
           });
 
-          startBtn.style.display = "none";
+          startBtn.style.display = "none"; // hide button after tap
         });
       });
     </script>
@@ -67,7 +65,7 @@
     </style>
   </head>
   <body>
-    <!-- ✅ Start button -->
+    <!-- Start AR button to enable audio on iOS -->
     <button id="startBtn">Start AR</button>
 
     <a-scene
@@ -84,7 +82,6 @@
           src="https://cdn.jsdelivr.net/gh/theeniolaa/twinss@main/assets/twinsvideo.mp4"
           crossorigin="anonymous"
           loop
-          muted
           playsinline
           webkit-playsinline
         ></video>
